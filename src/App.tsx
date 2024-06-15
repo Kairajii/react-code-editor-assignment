@@ -1,26 +1,13 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import CodeEditor from "./components/CodeEditor";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="w-screen h-screen flex flex-col bg-white m-0 p-0 box-border">
+      <div className="w-[90%] mx-auto my-5">
+        <h1 className="text-center text-black text-3xl font-serif tracking-wider">CODE EDITIOR</h1>
+      </div>
+      <CodeEditor />
     </div>
   );
 }
-
 export default App;
