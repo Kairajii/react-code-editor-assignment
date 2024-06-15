@@ -1,43 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism.css'; // Import PrismJS theme
 import 'prismjs/components/prism-javascript'; // Import the JavaScript language definition
 
 const CodeEditor = () => {
   const [code, setCode] = useState('');
+  const editorRef = useRef<HTMLDivElement>(null);
 
-  const handleChange = (event:any) => {
-    setCode(event.target.value);
+  const saveCursorPosition = () => {
+    const selection = window.getSelection();
+    if (!selection?.rangeCount) return { start: 0, end: 0 };
+
+    const range = selection.getRangeAt(0);
+    const preSelectionRange = range.cloneRange();
+    preSelectionRange.selectNodeContents(editorRef.current as Node);
+    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+    const start = preSelectionRange.toString().length;
+
+    return {
+      start,
+      end: start + range.toString().length
+    };
+  };
+
+  const restoreCursorPosition = (savedPosition: { start: number; end: number }) => {
+    const { start, end } = savedPosition;
+    const charIndex = { current: 0 };
+    const range = document.createRange();
+    range.setStart(editorRef.current as Node, 0);
+    range.collapse(true);
+
+    const setRange = (node: Node) => {
+      if (charIndex.current >= end) return;
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        const textNodeLength = (node.textContent || '').length;
+        if (charIndex.current + textNodeLength >= start) {
+          range.setStart(node, start - charIndex.current);
+        }
+        if (charIndex.current + textNodeLength >= end) {
+          range.setEnd(node, end - charIndex.current);
+        }
+        charIndex.current += textNodeLength;
+      } else {
+        Array.from(node.childNodes).forEach(setRange);
+      }
+    };
+
+    setRange(editorRef.current as Node);
+
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  };
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const cursorPosition = saveCursorPosition();
+      
+      // Update innerHTML with highlighted code
+      editorRef.current.innerHTML = Prism.highlight(code, Prism.languages.javascript, 'javascript');
+      
+      restoreCursorPosition(cursorPosition);
+    }
+  }, [code]);
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      setCode(editorRef.current.innerText || '');
+    }
   };
 
   return (
     <div className="relative w-full max-w-4xl mx-auto font-mono">
-      <div className="relative w-full h-96 p-4 overflow-hidden border border-gray-700 rounded-md bg-gray-900">
-        <textarea
-          className="absolute top-0 left-0 z-0 w-full h-full p-4 text-transparent bg-transparent border-none caret-black focus:outline-none bg-white"
-          value={code}
-          onChange={handleChange}
-          spellCheck="false"
-          style={{
-            whiteSpace: 'pre',
-            wordWrap: 'break-word',
-            overflow: 'hidden',
-            resize: 'none',
-            zIndex: 1, // Set the z-index to ensure it's behind the highlighted text
-          }}
-        />
-        <pre
-          className="absolute top-0 left-0 z-10 w-full h-full p-4 overflow-auto bg-transparent pointer-events-none"
-          aria-hidden="true"
-        >
-          <code
-            className="language-javascript"
-            dangerouslySetInnerHTML={{
-              __html: Prism.highlight(code, Prism.languages.javascript, 'javascript'),
-            }}
-          />
-        </pre>
-      </div>
+      <div
+        ref={editorRef}
+        contentEditable={true}
+        className="w-full h-96 p-4 overflow-auto bg-transparent border border-gray-700 rounded-md resize-none focus:outline-none text-black caret-black"
+        onInput={handleInput}
+        spellCheck="false"
+        style={{
+          whiteSpace: 'pre-wrap',
+          wordWrap: 'break-word',
+          outline: 'none',
+        }}
+      />
     </div>
   );
 };
