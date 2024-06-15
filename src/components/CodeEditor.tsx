@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Prism from 'prismjs';
-import 'prismjs/themes/prism.css'; // Import PrismJS theme
-import 'prismjs/components/prism-javascript'; // Import the JavaScript language definition
+import 'prismjs/themes/prism.css'; 
+import 'prismjs/components/prism-javascript';
 
 const CodeEditor = () => {
   const [code, setCode] = useState('');
@@ -57,10 +57,7 @@ const CodeEditor = () => {
   useEffect(() => {
     if (editorRef.current) {
       const cursorPosition = saveCursorPosition();
-      
-      // Update innerHTML with highlighted code
-      editorRef.current.innerHTML = Prism.highlight(code, Prism.languages.javascript, 'javascript');
-      
+      editorRef.current.innerHTML = Prism.highlight(code, Prism.languages.javascript, 'javascript');  
       restoreCursorPosition(cursorPosition);
     }
   }, [code]);
