@@ -75,6 +75,30 @@ const CodeEditor = () => {
     }
   };
 
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+
+      const br = document.createElement("br");
+      const textNode = document.createTextNode("\u200B");
+
+      range.insertNode(br);
+      range.collapse(false);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      handleInput(); // Update the code state
+    }
+  };
+
   return (
     <div className="relative w-full max-w-4xl mx-auto font-mono">
       <div
@@ -82,6 +106,7 @@ const CodeEditor = () => {
         contentEditable={true}
         className="w-full h-96 p-4 overflow-auto bg-transparent border border-gray-700 rounded-md resize-none focus:outline-none text-black caret-black"
         onInput={handleInput}
+        onKeyPress={handleKeyPress}
         spellCheck="false"
         style={{
           whiteSpace: "pre-wrap",
