@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import Prism from 'prismjs';
-import 'prismjs/themes/prism.css'; 
-import 'prismjs/components/prism-javascript';
+import React, { useState, useRef, useEffect } from "react";
+import Prism from "prismjs";
+import "prismjs/themes/prism.css";
+import "prismjs/components/prism-javascript";
 
 const CodeEditor = () => {
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
 
   const saveCursorPosition = () => {
@@ -19,11 +19,14 @@ const CodeEditor = () => {
 
     return {
       start,
-      end: start + range.toString().length
+      end: start + range.toString().length,
     };
   };
 
-  const restoreCursorPosition = (savedPosition: { start: number; end: number }) => {
+  const restoreCursorPosition = (savedPosition: {
+    start: number;
+    end: number;
+  }) => {
     const { start, end } = savedPosition;
     const charIndex = { current: 0 };
     const range = document.createRange();
@@ -34,7 +37,7 @@ const CodeEditor = () => {
       if (charIndex.current >= end) return;
 
       if (node.nodeType === Node.TEXT_NODE) {
-        const textNodeLength = (node.textContent || '').length;
+        const textNodeLength = (node.textContent || "").length;
         if (charIndex.current + textNodeLength >= start) {
           range.setStart(node, start - charIndex.current);
         }
@@ -57,14 +60,18 @@ const CodeEditor = () => {
   useEffect(() => {
     if (editorRef.current) {
       const cursorPosition = saveCursorPosition();
-      editorRef.current.innerHTML = Prism.highlight(code, Prism.languages.javascript, 'javascript');  
+      editorRef.current.innerHTML = Prism.highlight(
+        code,
+        Prism.languages.javascript,
+        "javascript"
+      );
       restoreCursorPosition(cursorPosition);
     }
   }, [code]);
 
   const handleInput = () => {
     if (editorRef.current) {
-      setCode(editorRef.current.innerText || '');
+      setCode(editorRef.current.innerText || "");
     }
   };
 
@@ -77,9 +84,9 @@ const CodeEditor = () => {
         onInput={handleInput}
         spellCheck="false"
         style={{
-          whiteSpace: 'pre-wrap',
-          wordWrap: 'break-word',
-          outline: 'none',
+          whiteSpace: "pre-wrap",
+          wordWrap: "break-word",
+          outline: "none",
         }}
       />
     </div>
